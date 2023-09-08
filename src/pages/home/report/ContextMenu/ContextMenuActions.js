@@ -21,6 +21,7 @@ import QuickEmojiReactions from '../../../../components/Reactions/QuickEmojiReac
 import MiniQuickEmojiReactions from '../../../../components/Reactions/MiniQuickEmojiReactions';
 import Navigation from '../../../../libs/Navigation/Navigation';
 import ROUTES from '../../../../ROUTES';
+import {getTransaction} from "../../../../libs/TransactionUtils";
 
 /**
  * Gets the HTML version of the message in an action.
@@ -199,6 +200,24 @@ export default [
                 } else if (ReportActionsUtils.isModifiedExpenseAction(reportAction)) {
                     const modifyExpenseMessage = ReportUtils.getModifiedExpenseMessage(reportAction);
                     Clipboard.setString(modifyExpenseMessage);
+                } else if (ReportActionsUtils.isMoneyRequestAction(reportAction)) {
+                    const transaction = getTransaction(originalMessage.IOUTransactionID);
+                    const {
+                        amount,
+                        currency,
+                        comment
+                    } = ReportUtils.getTransactionDetails(transaction);
+
+                    const iouReportActionMessage = ReportUtils.getIOUReportActionMessage(
+                        transaction.reportID,
+                        originalMessage.type,
+                        amount,
+                        comment,
+                        currency,
+                    );
+
+                    const iouMessageHtml = lodashGet(_.last(iouReportActionMessage), 'html', '');
+                    Clipboard.setString(iouMessageHtml);
                 } else if (content) {
                     const parser = new ExpensiMark();
                     if (!Clipboard.canSetHtml()) {
