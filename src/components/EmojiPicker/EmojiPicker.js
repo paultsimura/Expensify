@@ -66,13 +66,8 @@ const EmojiPicker = forwardRef((props, ref) => {
 
     /**
      * Hide the emoji picker menu.
-     *
-     * @param {Boolean} isNavigating
      */
-    const hideEmojiPicker = (isNavigating) => {
-        if (isNavigating) {
-            onModalHide.current = () => {};
-        }
+    const hideEmojiPicker = () => {
         emojiPopoverAnchor.current = null;
         setIsEmojiPickerVisible(false);
     };
