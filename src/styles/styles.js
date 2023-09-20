@@ -1650,6 +1650,14 @@ const styles = (theme) => ({
         paddingTop: 2,
     },
 
+    chatItemMessageHeaderWhisper: {
+        flexShrink: 0,
+        color: theme.textSupporting,
+        fontSize: variables.fontSizeSmall,
+        lineHeight: variables.lineHeightSmall,
+        paddingTop: 1,
+    },
+
     chatItemMessage: {
         color: theme.text,
         fontSize: variables.fontSizeNormal,

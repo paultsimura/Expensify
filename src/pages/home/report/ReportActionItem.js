@@ -633,7 +633,7 @@ function ReportActionItem(props) {
                                                 small
                                             />
                                         </View>
-                                        <Text style={[styles.chatItemMessageHeaderTimestamp]}>
+                                        <Text style={[styles.chatItemMessageHeaderWhisper]}>
                                             {props.translate('reportActionContextMenu.onlyVisible')}
                                             &nbsp;
                                         </Text>
@@ -642,7 +642,7 @@ function ReportActionItem(props) {
                                             displayNamesWithTooltips={displayNamesWithTooltips}
                                             tooltipEnabled
                                             numberOfLines={1}
-                                            textStyles={[styles.chatItemMessageHeaderTimestamp, styles.flex1]}
+                                            textStyles={[styles.chatItemMessageHeaderWhisper, styles.flex1]}
                                             shouldUseFullTitle={isWhisperOnlyVisibleByUser}
                                         />
                                     </View>
