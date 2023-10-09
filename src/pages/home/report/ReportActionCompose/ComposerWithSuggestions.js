@@ -478,7 +478,7 @@ function ComposerWithSuggestions({
             return;
         }
 
-        focus();
+        focus(true);
     }, [focus, prevIsFocused, prevIsModalVisible, isFocused, modal.isVisible, isNextModalWillOpenRef]);
 
     useEffect(() => {

@@ -72,9 +72,7 @@ function BaseModal({
                 onModalHide();
             }
             Modal.onModalDidClose();
-            if (!fullscreen) {
-                ComposerFocusManager.setReadyToFocus();
-            }
+            ComposerFocusManager.setReadyToFocus();
         },
         [shouldSetModalVisibility, onModalHide, fullscreen],
     );
@@ -120,8 +118,8 @@ function BaseModal({
         onClose();
     };
 
-    const handleDismissModal = () => {
-        ComposerFocusManager.setReadyToFocus();
+    const handleModalWillShow = () => {
+        ComposerFocusManager.resetReadyToFocus();
     };
 
     const {
@@ -180,10 +178,10 @@ function BaseModal({
             // Note: Escape key on web/desktop will trigger onBackButtonPress callback
             // eslint-disable-next-line react/jsx-props-no-multi-spaces
             onBackButtonPress={onClose}
+            onModalWillShow={handleModalWillShow}
             onModalShow={handleShowModal}
             propagateSwipe={propagateSwipe}
             onModalHide={hideModal}
-            onDismiss={handleDismissModal}
             onSwipeComplete={onClose}
             swipeDirection={swipeDirection}
             isVisible={isVisible}
