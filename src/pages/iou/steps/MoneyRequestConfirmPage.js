@@ -11,6 +11,7 @@ import styles from '../../../styles/styles';
 import Navigation from '../../../libs/Navigation/Navigation';
 import ROUTES from '../../../ROUTES';
 import * as IOU from '../../../libs/actions/IOU';
+import * as Transaction from '../../../libs/actions/Transaction';
 import compose from '../../../libs/compose';
 import * as ReportUtils from '../../../libs/ReportUtils';
 import * as OptionsListUtils from '../../../libs/OptionsListUtils';
@@ -189,19 +190,21 @@ function MoneyRequestConfirmPage(props) {
      */
     const createDistanceRequest = useCallback(
         (selectedParticipants, trimmedComment) => {
-            IOU.createDistanceRequest(
-                props.report,
-                selectedParticipants[0],
-                trimmedComment,
-                props.iou.created,
-                props.iou.transactionID,
-                props.iou.category,
-                props.iou.tag,
-                props.iou.amount,
-                props.iou.currency,
-                props.iou.merchant,
-                props.iou.billable,
-            );
+            Transaction.cleanupWaypoints(props.iou.transactionID).then(() => {
+                IOU.createDistanceRequest(
+                    props.report,
+                    selectedParticipants[0],
+                    trimmedComment,
+                    props.iou.created,
+                    props.iou.transactionID,
+                    props.iou.category,
+                    props.iou.tag,
+                    props.iou.amount,
+                    props.iou.currency,
+                    props.iou.merchant,
+                    props.iou.billable,
+                );
+            });
         },
         [props.report, props.iou.created, props.iou.transactionID, props.iou.category, props.iou.tag, props.iou.amount, props.iou.currency, props.iou.merchant, props.iou.billable],
     );

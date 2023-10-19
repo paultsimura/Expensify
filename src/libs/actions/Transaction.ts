@@ -1,6 +1,8 @@
 import Onyx from 'react-native-onyx';
 import lodashHas from 'lodash/has';
 import lodashClone from 'lodash/clone';
+import lodashGet from 'lodash/get';
+import lodashReduce from 'lodash/reduce';
 import {isEqual} from 'lodash';
 import ONYXKEYS from '../../ONYXKEYS';
 import * as CollectionUtils from '../CollectionUtils';
@@ -238,4 +240,22 @@ function updateWaypoints(transactionID: string, waypoints: WaypointCollection): 
     });
 }
 
-export {addStop, createInitialWaypoints, saveWaypoint, removeWaypoint, getRoute, updateWaypoints};
+function cleanupWaypoints(transactionID: string): Promise<void> {
+    const transaction = allTransactions[transactionID];
+    const existingWaypoints = lodashGet(transaction, 'comment.waypoints', {});
+    const validWaypoints = TransactionUtils.getValidWaypoints(existingWaypoints, true);
+
+    const updatedWaypoints: WaypointCollection = lodashReduce(existingWaypoints, (result, value, key) => ({
+        ...result,
+        // Explicitly set the non-existing waypoints to null so that Onyx can remove them
+        [key]: validWaypoints[key] ?? null,
+    }), {});
+
+    return Onyx.merge(`${ONYXKEYS.COLLECTION.TRANSACTION}${transactionID}`, {
+        comment: {
+            waypoints: updatedWaypoints,
+        },
+    });
+}
+
+export {addStop, createInitialWaypoints, saveWaypoint, removeWaypoint, getRoute, updateWaypoints, cleanupWaypoints};

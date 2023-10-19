@@ -646,7 +646,7 @@ function createDistanceRequest(report, participant, comment, created, transactio
             createdChatReportActionID,
             createdIOUReportActionID,
             reportPreviewReportActionID: reportPreviewAction.reportActionID,
-            waypoints: JSON.stringify(TransactionUtils.getValidWaypoints(transaction.comment.waypoints, true)),
+            waypoints: JSON.stringify(transaction.comment.waypoints),
             created,
             category,
             tag,
