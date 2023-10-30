@@ -22,6 +22,7 @@ export default function useAutoFocusInput() {
                 setIsScreenTransitionEnded(true);
             }, CONST.ANIMATED_TRANSITION);
             return () => {
+                setIsScreenTransitionEnded(false);
                 if (!focusTimeoutRef.current) {
                     return;
                 }
