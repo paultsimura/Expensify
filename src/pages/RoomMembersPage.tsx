@@ -69,8 +69,6 @@ function RoomMembersPage({report, session, policies}: RoomMembersPageProps) {
     const {shouldUseNarrowLayout, isSmallScreenWidth} = useResponsiveLayout();
     const [selectionMode] = useOnyx(ONYXKEYS.MOBILE_SELECTION_MODE);
     const canSelectMultiple = isSmallScreenWidth ? selectionMode?.isEnabled : true;
-
-    const [shouldShowTextInput, setShouldShowTextInput] = useState(false);
     const {isOffline} = useNetwork();
 
     useEffect(() => {
@@ -173,24 +171,28 @@ function RoomMembersPage({report, session, policies}: RoomMembersPageProps) {
         }
     };
 
-    /** Include the search bar when there are 8 or more members in the selection list */
-    const updateShouldShowTextInput = (listItemsNumber: number) => {
-        const shouldEnableSearch = listItemsNumber >= CONST.SHOULD_SHOW_MEMBERS_SEARCH_INPUT_BREAKPOINT;
-        if (shouldShowTextInput !== shouldEnableSearch) {
-            setShouldShowTextInput(shouldEnableSearch);
-            if (!shouldEnableSearch) {
-                setSearchValue('');
+    const participants = useMemo(() => {
+        return ReportUtils.getParticipantsList(report, personalDetails, true);
+    }, [report, personalDetails]);
+
+    /** Include the search bar when there are 8 or more active members in the selection list */
+    const shouldShowTextInput = useMemo(() => {
+        // Get the active chat members by filtering out the pending members with delete action
+        const activeParticipants = participants.filter((accountID) => {
+            const pendingMember = report?.pendingChatMembers?.findLast((member) => member.accountID === accountID.toString());
+            if (!personalDetails?.[accountID]) {
+                return false;
             }
-        }
-    };
 
-    const getMemberOptions = (): ListItem[] => {
+            // When offline, we want to count in the pending members with delete action as they are displayed in the list as well
+            return !pendingMember || isOffline || pendingMember.pendingAction !== CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE;
+        });
+
+        return activeParticipants.length >= CONST.SHOULD_SHOW_MEMBERS_SEARCH_INPUT_BREAKPOINT;
+    }, [participants, personalDetails, isOffline, report]);
+
+    const data = useMemo(() => {
         let result: ListItem[] = [];
-
-        const participants = ReportUtils.getParticipantsList(report, personalDetails, true);
-
-        // a counter for updateShouldShowTextInput logic
-        let listItemsNumber = 0;
 
         participants.forEach((accountID) => {
             const details = personalDetails[accountID];
@@ -206,15 +208,6 @@ function RoomMembersPage({report, session, policies}: RoomMembersPageProps) {
                 accountID === session?.accountID ||
                 pendingChatMember?.pendingAction === CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE ||
                 details.accountID === report.ownerAccountID;
-
-            const isPendingDeletion = pendingChatMember?.pendingAction === CONST.RED_BRICK_ROAD_PENDING_ACTION.DELETE;
-
-            // Increment the listItemsNumber if the member is not pending deletion or if the app is offline.
-            // When offline, optimistically deleted members are still displayed (with strikethrough)
-            // Therefore, we need to include them for shouldShowTextInput logic.
-            if (!isPendingDeletion || isOffline) {
-                listItemsNumber++;
-            }
 
             result.push({
                 keyForList: String(accountID),
@@ -236,12 +229,8 @@ function RoomMembersPage({report, session, policies}: RoomMembersPageProps) {
             });
         });
 
-        updateShouldShowTextInput(listItemsNumber);
-
-        result = result.sort((value1, value2) => localeCompare(value1.text ?? '', value2.text ?? ''));
-
-        return result;
-    };
+        return result.sort((value1, value2) => localeCompare(value1.text ?? '', value2.text ?? ''));
+    }, [report, participants, searchValue, formatPhoneNumber, personalDetails, selectedMembers, localeCompare]);
 
     const dismissError = useCallback(
         (item: ListItem) => {
@@ -256,8 +245,6 @@ function RoomMembersPage({report, session, policies}: RoomMembersPageProps) {
         }
         return PolicyUtils.isPolicyEmployee(report.policyID, policies);
     }, [report?.policyID, policies]);
-
-    const data = getMemberOptions();
 
     const headerMessage = searchValue.trim() && !data.length ? translate('roomMembersPage.memberNotFound') : '';
 
